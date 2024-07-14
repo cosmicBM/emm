@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Play Images with Pause Button</title>
+    <style>
+      #imageContainer {
+            position: relative;
+            width: 80%;
+            height: auto;
+            margin-left: auto;
+            overflow: hidden;
+        }
+        #imageContainer img {
+            width: 100%;
+            object-fit: contain;
+        }
+        #control {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="imageContainer">
+        <!-- 图片将在这里动态加载 -->
+    </div>
+    <div id="control">播放;</div>
+
+    <script>
+           const imageContainer = document.getElementById('imageContainer');
+    const controlButton = document.getElementById('control');
+    let images = [];
+    let currentImageIndex = 0;
+    let animationFrameId = null;
+    let startTime = null;
+    let timePerImage = 1000; // 每张图片显示的时间（毫秒）
+    let animationPaused = false;
+
+    // 加载图片数组
+    for (let i = 1; i <= 13; i++) {
+        images.push(`布局${i}.png`);
+    }
+
+    function loadNextImage() {
+        const img = new Image();
+        img.src = images[currentImageIndex];
+        img.onload = function() {
+            imageContainer.innerHTML = ''; // 清空容器
+            imageContainer.appendChild(img);
+            startTime = performance.now(); // 设置开始时间
+            animationFrameId = requestAnimationFrame(updateImage);
+        };
+    }
+
+    function updateImage(timestamp) {
+        if (!animationPaused && timestamp - startTime >= timePerImage) {
+            if (currentImageIndex === images.length - 1) {
+                currentImageIndex = 0;
+            } else {
+                currentImageIndex++;
+            }
+            loadNextImage();
+        } else {
+            animationFrameId = requestAnimationFrame(updateImage);
+        }
+    }
+
+    controlButton.addEventListener('click', function() {
+        animationPaused = !animationPaused;
+        if (animationPaused) {
+            cancelAnimationFrame(animationFrameId);
+            controlButton.textContent = "播放;";
+        } else {
+            animationFrameId = requestAnimationFrame(updateImage);
+            controlButton.textContent = "暂停;";
+        }
+    });
+
+    loadNextImage(); // 开始播放第一张图片
+    </script>
+</body>
+</html>
